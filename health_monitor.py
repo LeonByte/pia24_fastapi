@@ -62,14 +62,14 @@ def check_disk():
     return None
 
 def check_ssh_logs():
-    """Monitors SSH logs for failed login attempts on Ubuntu"""
+    """Monitors SSH logs for failed login attempts when using SSH keys"""
     try:
         # Läs /var/log/auth.log och sök efter misslyckade SSH-inloggningar
         with open('/var/log/auth.log', 'r') as log_file:
             logs = log_file.readlines()
         
-        # Filtrera för rader som innehåller "Failed password"
-        failed_attempts = [log for log in logs if "Failed password" in log]
+        # Filtrera för rader som innehåller "Authentication failed" eller "Connection closed by authenticating user"
+        failed_attempts = [log for log in logs if "Authentication failed" in log or "Connection closed by authenticating user" in log]
         
         if len(failed_attempts) >= THRESHOLDS['ssh_attempts']:
             current_time = time.time()
@@ -80,6 +80,27 @@ def check_ssh_logs():
     except Exception as e:
         return f"⚠️ Error checking SSH logs: {str(e)}"
     return None
+
+
+# def check_ssh_logs():
+#     """Monitors SSH logs for failed login attempts on Ubuntu"""
+#     try:
+#         # Läs /var/log/auth.log och sök efter misslyckade SSH-inloggningar
+#         with open('/var/log/auth.log', 'r') as log_file:
+#             logs = log_file.readlines()
+        
+#         # Filtrera för rader som innehåller "Failed password"
+#         failed_attempts = [log for log in logs if "Failed password" in log]
+        
+#         if len(failed_attempts) >= THRESHOLDS['ssh_attempts']:
+#             current_time = time.time()
+#             if current_time - last_alerts['ssh'] > ALERT_COOLDOWN:
+#                 last_alerts['ssh'] = current_time
+#                 return f"🚨 SSH alert: {len(failed_attempts)} failed login attempts\n" \
+#                        f"Recent attempts:\n" + "\n".join(failed_attempts[-3:])
+#     except Exception as e:
+#         return f"⚠️ Error checking SSH logs: {str(e)}"
+#     return None
 
 # def check_ssh_logs():
 #     """Monitors SSH logs for failed login attempts"""
